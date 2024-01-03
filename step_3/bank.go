@@ -40,13 +40,7 @@ func main() {
 
 	for {
 
-		fmt.Println(`
-Welcome to GO bank!
-1. Balance
-2. Deposit
-3. Withdraw
-4. Exit
-	`)
+		printChoice()
 
 		var choice int
 		fmt.Print("Choice? ")
