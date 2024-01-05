@@ -1,3 +1,3 @@
-module org.gfoo/pointers
+module org.gfoo/structs
 
 go 1.21.5
