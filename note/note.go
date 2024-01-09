@@ -16,7 +16,7 @@ type Note struct {
 }
 
 func (n Note) String() string {
-	return fmt.Sprintf("Title: %s\nContent: %s\nCreated At: %s", n.Title, n.Content, n.CreatedAt.String())
+	return fmt.Sprintf("[Note]\nTitle: %s\nContent: %s\nCreated At: %s", n.Title, n.Content, n.CreatedAt.String())
 }
 
 func New(title, content string) (*Note, error) {
