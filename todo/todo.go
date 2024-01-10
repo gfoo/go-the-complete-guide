@@ -12,7 +12,7 @@ type Todo struct {
 }
 
 func (t Todo) String() string {
-	return fmt.Sprintf("[Todo]\nTitle: %s", t.Text)
+	return fmt.Sprintf("Title: %s", t.Text)
 }
 
 func New(text string) (*Todo, error) {

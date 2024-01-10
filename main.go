@@ -15,6 +15,15 @@ type saver interface {
 	Save() error
 }
 
+type displayer interface {
+	String() string
+}
+
+type outputable interface {
+	saver     // interface with one methode called save
+	displayer // interface with one methode called String
+}
+
 func getUserInput(prompt string) string {
 	fmt.Print(prompt, " ")
 	reader := bufio.NewReader(os.Stdin)
@@ -50,7 +59,36 @@ func saveData(data saver) error {
 	return nil
 }
 
+func outputData(data outputable) error {
+	err := printSomething(data)
+	if err != nil {
+		return err
+	}
+	return saveData(data)
+}
+
+func printSomething(data interface{}) error {
+
+	note, ok := data.(*note.Note)
+	if ok {
+		fmt.Println("Note:", note)
+		return nil
+	}
+	todo, ok := data.(*todo.Todo)
+	if ok {
+		fmt.Println("Todo:", todo)
+		return nil
+	}
+	return fmt.Errorf("do not print content of this type: %T", data)
+}
+
 func main() {
+
+	// err := printSomething("Hello")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
 	title, content := getNoteData()
 	text := getTodoData()
 
@@ -59,21 +97,16 @@ func main() {
 		fmt.Println("Error creating todo:", err)
 		return
 	}
-	fmt.Println(userTodo)
+	err = outputData(userTodo)
+	if err != nil {
+		return
+	}
 
 	userNote, err := note.New(title, content)
 	if err != nil {
-		fmt.Println("Error creating note:", err)
 		return
 	}
-	fmt.Println(userNote)
-
-	err = saveData(userTodo)
-	if err != nil {
-		return
-	}
-
-	err = saveData(userNote)
+	err = outputData(userNote)
 	if err != nil {
 		return
 	}
