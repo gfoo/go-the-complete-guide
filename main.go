@@ -8,13 +8,31 @@ func main() {
 
 	numbers := []int{1, 2, 3, 4}
 	fmt.Println(numbers)
-	doubled := tranformNumbers(&numbers, double)
+	doubled := transformNumbers(&numbers, double)
 	fmt.Println(doubled)
-	tripled := tranformNumbers(&numbers, triple)
+	tripled := transformNumbers(&numbers, triple)
 	fmt.Println(tripled)
+
+	moreNumbers := []int{5, 1, 2}
+
+	transformFn1 := getTransformFn(&numbers)
+	transformFn2 := getTransformFn(&moreNumbers)
+
+	transformedNumbers := transformNumbers(&numbers, transformFn1)
+	moreTransformedNumbers := transformNumbers(&moreNumbers, transformFn2)
+
+	fmt.Println(transformedNumbers)
+	fmt.Println(moreTransformedNumbers)
 }
 
-func tranformNumbers(numbers *[]int, transform transformFn) []int {
+func getTransformFn(numbers *[]int) transformFn {
+	if (*numbers)[0] == 1 {
+		return double
+	}
+	return triple
+}
+
+func transformNumbers(numbers *[]int, transform transformFn) []int {
 	doubleNumbers := []int{}
 	for _, v := range *numbers {
 		doubleNumbers = append(doubleNumbers, transform(v))
