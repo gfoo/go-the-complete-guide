@@ -3,34 +3,13 @@ package main
 import "fmt"
 
 func main() {
-	numbers := []int{1, 2, 3}
 
-	transformed := transformNumbers(&numbers, func(val int) int {
-		return val * 2
-	})
-	fmt.Println(transformed)
-
-	double := createTrans(2)
-	triple := createTrans(3)
-
-	doubled := transformNumbers(&numbers, double)
-	fmt.Println(doubled)
-	tripled := transformNumbers(&numbers, triple)
-	fmt.Println(tripled)
+	fmt.Println("Factorial of 5 is: ", factorial(5))
 }
 
-func transformNumbers(numbers *[]int, transform func(int) int) []int {
-	dNumbers := []int{}
-
-	for _, val := range *numbers {
-		dNumbers = append(dNumbers, transform(val))
+func factorial(n int) int {
+	if n == 0 {
+		return 1
 	}
-
-	return dNumbers
-}
-
-func createTrans(factor int) func(int) int {
-	return func(val int) int {
-		return val * factor
-	}
+	return n * factorial(n-1)
 }
