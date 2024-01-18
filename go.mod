@@ -1,3 +1,3 @@
-module org.gfoo/go-project
+module org.gfoo/price-calculator
 
 go 1.21.5

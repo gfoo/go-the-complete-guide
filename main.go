@@ -1,30 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"org.gfoo/price-calculator/prices"
+)
 
 func main() {
+	taxRates := []float64{0, 0.07, 0.1, 0.15}
 
-	numbers := []int{1, 2, 3, 4, 5}
-
-	fmt.Println(sumup(numbers))
-
-	fmt.Println(sumup2(1, 2, 3, 4, 5))
-
-	fmt.Println(sumup2(numbers...))
-}
-
-func sumup(numbers []int) int {
-	sum := 0
-	for _, val := range numbers {
-		sum += val
+	for _, taxRate := range taxRates {
+		priceJob := prices.NewTaxIncludedPriceJob(taxRate)
+		priceJob.Process()
 	}
-	return sum
-}
-
-func sumup2(numbers ...int) int {
-	sum := 0
-	for _, val := range numbers {
-		sum += val
-	}
-	return sum
 }
