@@ -7,10 +7,15 @@ import (
 	"os"
 )
 
-func ReadLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+type FileManager struct {
+	InuptFilePath  string
+	OutputFilePath string
+}
+
+func (fm FileManager) ReadLines() ([]string, error) {
+	file, err := os.Open(fm.InuptFilePath)
 	if err != nil {
-		return nil, errors.New("Could not open the file " + path)
+		return nil, errors.New("Could not open the file " + fm.InuptFilePath)
 	}
 	scanner := bufio.NewScanner(file)
 	lines := make([]string, 0)
@@ -20,16 +25,16 @@ func ReadLines(path string) ([]string, error) {
 	err = scanner.Err()
 	if err != nil {
 		file.Close()
-		return nil, errors.New("Error reading the file " + path)
+		return nil, errors.New("Error reading the file " + fm.InuptFilePath)
 	}
 	file.Close()
 	return lines, nil
 }
 
-func WriteJSON(data interface{}, path string) error {
-	file, err := os.Create(path)
+func (fm FileManager) WriteResult(data interface{}) error {
+	file, err := os.Create(fm.OutputFilePath)
 	if err != nil {
-		return errors.New("Could not create the file " + path)
+		return errors.New("Could not create the file " + fm.OutputFilePath)
 	}
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(data)
@@ -39,4 +44,11 @@ func WriteJSON(data interface{}, path string) error {
 	}
 	file.Close()
 	return nil
+}
+
+func News(inuptFilePath string, outputFilePath string) FileManager {
+	return FileManager{
+		InuptFilePath:  inuptFilePath,
+		OutputFilePath: outputFilePath,
+	}
 }
