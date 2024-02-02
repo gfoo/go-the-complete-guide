@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"time"
 )
 
 type FileManager struct {
@@ -17,6 +18,9 @@ func (fm FileManager) ReadLines() ([]string, error) {
 	if err != nil {
 		return nil, errors.New("Could not open the file " + fm.InuptFilePath)
 	}
+
+	defer file.Close()
+
 	scanner := bufio.NewScanner(file)
 	lines := make([]string, 0)
 	for scanner.Scan() {
@@ -24,10 +28,10 @@ func (fm FileManager) ReadLines() ([]string, error) {
 	}
 	err = scanner.Err()
 	if err != nil {
-		file.Close()
+		// file.Close()
 		return nil, errors.New("Error reading the file " + fm.InuptFilePath)
 	}
-	file.Close()
+	// file.Close()
 	return lines, nil
 }
 
@@ -36,13 +40,18 @@ func (fm FileManager) WriteResult(data interface{}) error {
 	if err != nil {
 		return errors.New("Could not create the file " + fm.OutputFilePath)
 	}
+
+	defer file.Close()
+
+	time.Sleep(3 * time.Second)
+
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(data)
 	if err != nil {
-		file.Close()
+		// file.Close()
 		return errors.New("Could not encode the data as JSON")
 	}
-	file.Close()
+	// file.Close()
 	return nil
 }
 
