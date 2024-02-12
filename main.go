@@ -1,44 +1,46 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
 
-	"org.gfoo/price-calculator/filemanager"
-	"org.gfoo/price-calculator/prices"
+	"github.com/gin-gonic/gin"
+	"org.gfoo/api-rest/db"
+	"org.gfoo/api-rest/models"
 )
 
 func main() {
-	taxRates := []float64{0, 0.07, 0.1, 0.15}
-	doneChans := make([]chan bool, len(taxRates))
-	errorChans := make([]chan error, len(taxRates))
+	db.InitDB()
+	defer db.Close()
+	server := gin.Default()
+	server.GET("/events", getEvents)
+	server.POST("/events", createEvent)
 
-	for index, taxRate := range taxRates {
-		doneChans[index] = make(chan bool)
-		errorChans[index] = make(chan error)
-		iom := filemanager.News(
-			"prices.txt",
-			fmt.Sprintf("result_%.0f.json", taxRate*100),
-		)
-		// iom := cmdmanager.News()
-		priceJob := prices.NewTaxIncludedPriceJob(iom, taxRate)
+	server.Run(":8080")
+}
 
-		go priceJob.Process(doneChans[index], errorChans[index])
-		// err := priceJob.Process()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
-
+func getEvents(context *gin.Context) {
+	events, err := models.GetAllEvents()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get events from DB"})
 	}
+	context.JSON(http.StatusOK, events)
+}
 
-	for index := range taxRates {
-		select {
-		case err := <-errorChans[index]:
-			if err != nil {
-				fmt.Println(err)
-			}
-		case <-doneChans[index]:
-			fmt.Println("Done")
-		}
+func createEvent(context *gin.Context) {
+	var event models.Event
+	err := context.ShouldBindJSON(&event)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-
+	event.ID = 1
+	event.UserID = 1
+	err = event.Save()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could save event in DB"})
+	}
+	context.JSON(http.StatusCreated,
+		gin.H{"event": event, "message": "Event created successfully!"},
+	)
 }
