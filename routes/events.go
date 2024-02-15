@@ -8,7 +8,26 @@ import (
 	"org.gfoo/api-rest/models"
 )
 
-func UpdateEvent(context *gin.Context) {
+func deleteEvent(context *gin.Context) {
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid ID param"})
+		return
+	}
+	event, err := models.GetEventById(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from DB"})
+		return
+	}
+	err = event.Delete()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete event from DB"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully!"})
+}
+
+func updateEvent(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid ID param"})
@@ -36,7 +55,7 @@ func UpdateEvent(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!"})
 }
 
-func GetEventsById(context *gin.Context) {
+func getEventsById(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid ID param"})
@@ -50,7 +69,7 @@ func GetEventsById(context *gin.Context) {
 	context.JSON(http.StatusOK, event)
 }
 
-func GetEvents(context *gin.Context) {
+func getEvents(context *gin.Context) {
 	events, err := models.GetAllEvents()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get events from DB"})
@@ -59,7 +78,7 @@ func GetEvents(context *gin.Context) {
 	context.JSON(http.StatusOK, events)
 }
 
-func CreateEvent(context *gin.Context) {
+func createEvent(context *gin.Context) {
 	var event models.Event
 	err := context.ShouldBindJSON(&event)
 
