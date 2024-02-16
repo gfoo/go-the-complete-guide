@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"org.gfoo/api-rest/db"
 	"org.gfoo/api-rest/utils"
 )
@@ -34,4 +36,23 @@ func (u *User) Save() error {
 	userId, err := result.LastInsertId()
 	u.ID = userId
 	return err
+}
+
+func (u *User) ValidateCredentials() error {
+	query := `
+		SELECT password
+		FROM users
+		WHERE email = ?
+	`
+	row := db.DB.QueryRow(query, u.Email)
+	var hashedPassword string
+	err := row.Scan(&hashedPassword)
+	if err != nil {
+		return err
+	}
+
+	if !utils.CheckPassword(u.Password, hashedPassword) {
+		return errors.New("Invalid credentials")
+	}
+	return nil
 }
