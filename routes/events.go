@@ -42,7 +42,8 @@ func updateEvent(context *gin.Context) {
 	var updatedEvent models.Event
 	err = context.ShouldBindJSON(&updatedEvent)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest,
+			gin.H{"error": "Could not parse request data (not fit the model)"})
 		return
 	}
 
@@ -83,7 +84,8 @@ func createEvent(context *gin.Context) {
 	err := context.ShouldBindJSON(&event)
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest,
+			gin.H{"error": "Could not parse request data (not fit the model)"})
 		return
 	}
 	event.ID = 1
