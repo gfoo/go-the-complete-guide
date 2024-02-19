@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"org.gfoo/api-rest/models"
-	"org.gfoo/api-rest/utils"
 )
 
 func deleteEvent(context *gin.Context) {
@@ -17,12 +16,22 @@ func deleteEvent(context *gin.Context) {
 	}
 	event, err := models.GetEventById(id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not get event from DB"})
 		return
 	}
+
+	userId := context.GetInt64("userId")
+	if event.UserID != userId {
+		context.JSON(http.StatusForbidden,
+			gin.H{"message": "You are not allowed to delete this event"})
+		return
+	}
+
 	err = event.Delete()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete event from DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not delete event from DB"})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully!"})
@@ -34,9 +43,17 @@ func updateEvent(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Invalid ID param"})
 		return
 	}
-	_, err = models.GetEventById(id)
+	event, err := models.GetEventById(id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not get event from DB"})
+		return
+	}
+
+	userId := context.GetInt64("userId")
+	if event.UserID != userId {
+		context.JSON(http.StatusForbidden,
+			gin.H{"message": "You are not allowed to update this event"})
 		return
 	}
 
@@ -51,7 +68,8 @@ func updateEvent(context *gin.Context) {
 	updatedEvent.ID = id
 	err = updatedEvent.Update()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update event in DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not update event in DB"})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!"})
@@ -65,7 +83,8 @@ func getEventsById(context *gin.Context) {
 	}
 	event, err := models.GetEventById(id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event from DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not get event from DB"})
 		return
 	}
 	context.JSON(http.StatusOK, event)
@@ -74,7 +93,8 @@ func getEventsById(context *gin.Context) {
 func getEvents(context *gin.Context) {
 	events, err := models.GetAllEvents()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get events from DB"})
+		context.JSON(http.StatusInternalServerError,
+			gin.H{"message": "Could not get events from DB"})
 		return
 	}
 	context.JSON(http.StatusOK, events)
@@ -82,21 +102,8 @@ func getEvents(context *gin.Context) {
 
 func createEvent(context *gin.Context) {
 
-	token := context.Request.Header.Get("Authorization")
-	if token == "" {
-		context.JSON(http.StatusUnauthorized,
-			gin.H{"message": "Token is required"})
-		return
-	}
-
-	userId, err := utils.VerifyToken(token)
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-		return
-	}
-
 	var event models.Event
-	err = context.ShouldBindJSON(&event)
+	err := context.ShouldBindJSON(&event)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest,
@@ -104,7 +111,7 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	event.UserID = userId
+	event.UserID = context.GetInt64("userId")
 
 	err = event.Save()
 	if err != nil {
